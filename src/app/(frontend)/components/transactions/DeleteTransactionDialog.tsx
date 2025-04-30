@@ -1,5 +1,4 @@
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
 import { Transaction } from "@/types/transaction";
 import { useDeleteTransactionMutation } from "@/app/lib/Transactions";
 import {
@@ -49,6 +48,7 @@ const DeleteTransactionDialog = ({
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
             This action cannot be undone. This will permanently delete the
+            {transaction?.type === "income" ? " income" : " expense"}{" "}
             transaction
             {transaction && ` "${transaction.description}"`} from your account.
           </AlertDialogDescription>

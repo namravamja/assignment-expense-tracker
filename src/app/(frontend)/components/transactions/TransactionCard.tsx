@@ -38,7 +38,17 @@ const TransactionCard = ({
   const handleSaveEdit = async () => {
     if (editFormData) {
       try {
-        await updateTransaction(editFormData).unwrap();
+        // Ensure the amount has the correct sign based on the transaction type
+        const updatedData = {
+          ...editFormData,
+          // Make sure amount is positive for income and negative for expense
+          amount:
+            editFormData.type === "income"
+              ? Math.abs(editFormData.amount)
+              : -Math.abs(editFormData.amount),
+        };
+
+        await updateTransaction(updatedData).unwrap();
         onUpdateSuccess();
         setIsEditing(false);
         setEditFormData(null);

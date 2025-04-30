@@ -2,10 +2,9 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +31,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { useAddTransactionMutation } from "@/app/lib/Transactions";
 import toast from "react-hot-toast";
+import { Badge } from "@/components/ui/badge";
 
 // Category options
 const categories = [
@@ -56,6 +56,9 @@ function AddTransaction() {
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState<Date>(new Date());
   const [category, setCategory] = useState("");
+  const [transactionType, setTransactionType] = useState<"income" | "expense">(
+    "expense"
+  );
 
   // RTK Query mutation hook
   const [addTransaction, { isLoading: isSubmitting }] =
@@ -67,6 +70,14 @@ function AddTransaction() {
     amount: "",
     category: "",
   });
+
+  // Update transaction type based on amount input
+  useEffect(() => {
+    if (amount) {
+      const numAmount = parseFloat(amount);
+      setTransactionType(numAmount < 0 ? "expense" : "income");
+    }
+  }, [amount]);
 
   // Form submission handler
   async function handleSubmit(e: React.FormEvent) {
@@ -92,6 +103,7 @@ function AddTransaction() {
       amount: Number.parseFloat(amount),
       date: date.toISOString(), // Convert date to ISO string for API
       category,
+      type: transactionType, // Add transaction type based on amount sign
     };
 
     try {
@@ -117,6 +129,12 @@ function AddTransaction() {
     if (selectedDate) {
       setDate(selectedDate);
     }
+  };
+
+  // Handle amount change with sign detection
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setAmount(value);
   };
 
   return (
@@ -153,7 +171,19 @@ function AddTransaction() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="amount">Amount</Label>
+                <Label htmlFor="amount">
+                  Amount
+                  {amount && (
+                    <Badge
+                      className="ml-2"
+                      variant={
+                        transactionType === "income" ? "default" : "destructive"
+                      }
+                    >
+                      {transactionType === "income" ? "Income" : "Expense"}
+                    </Badge>
+                  )}
+                </Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                     $
@@ -165,14 +195,15 @@ function AddTransaction() {
                     placeholder="0.00"
                     className="pl-8"
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={handleAmountChange}
                   />
                 </div>
                 {errors.amount && (
                   <p className="text-sm text-destructive">{errors.amount}</p>
                 )}
                 <p className="text-sm text-muted-foreground">
-                  Use negative values for expenses (e.g., -50.00).
+                  Use negative values (e.g., -50.00) for expenses, positive
+                  values for income.
                 </p>
               </div>
 
@@ -187,7 +218,16 @@ function AddTransaction() {
                         !date ? "text-muted-foreground" : ""
                       }`}
                     >
-                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                      {date ? (
+                        date.toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </PopoverTrigger>

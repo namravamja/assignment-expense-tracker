@@ -40,7 +40,7 @@ export const navItems: NavItem[] = [
   },
   {
     title: "Expenses",
-    href: "/expenses",
+    href: "/Expenses",
     icon: Receipt,
   },
   {

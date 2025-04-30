@@ -1,5 +1,5 @@
 import { Save, X, Loader2 } from "lucide-react";
-import { Transaction } from "@/types/transaction";
+import { Transaction, TransactionType } from "@/types/transaction";
 import { formatDateForInput } from "@/lib/formatters";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
+const categories = [
+  { value: "food", label: "Food" },
+  { value: "housing", label: "Housing" },
+  { value: "transportation", label: "Transportation" },
+  { value: "utilities", label: "Utilities" },
+  { value: "insurance", label: "Insurance" },
+  { value: "healthcare", label: "Healthcare" },
+  { value: "entertainment", label: "Entertainment" },
+  { value: "personal", label: "Personal" },
+  { value: "education", label: "Education" },
+  { value: "income", label: "Income" },
+  { value: "other", label: "Other" },
+];
 
 interface TransactionEditFormProps {
   formData: Transaction;
@@ -33,10 +48,11 @@ const TransactionEditForm = ({
     field: keyof Transaction
   ) => {
     if (field === "amount") {
-      // Convert string to number for amount field
+      // Always store amount as positive in the form
+      // The actual sign will be applied on save based on transaction type
       setFormData({
         ...formData,
-        [field]: parseFloat(e.target.value) || 0,
+        [field]: Math.abs(parseFloat(e.target.value) || 0),
       });
     } else {
       setFormData({
@@ -52,6 +68,16 @@ const TransactionEditForm = ({
       category: value,
     });
   };
+
+  const handleTypeChange = (value: TransactionType) => {
+    setFormData({
+      ...formData,
+      type: value,
+    });
+  };
+
+  // Display absolute amount for editing
+  const displayAmount = Math.abs(formData.amount);
 
   return (
     <Card>
@@ -99,12 +125,37 @@ const TransactionEditForm = ({
         </div>
 
         <div className="space-y-2">
+          <Label>Transaction Type</Label>
+          <RadioGroup
+            value={formData.type}
+            onValueChange={(value: any) =>
+              handleTypeChange(value as TransactionType)
+            }
+            className="flex space-x-4"
+            disabled={isUpdating}
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="income" id="income" />
+              <Label htmlFor="income" className="cursor-pointer">
+                Income
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="expense" id="expense" />
+              <Label htmlFor="expense" className="cursor-pointer">
+                Expense
+              </Label>
+            </div>
+          </RadioGroup>
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="amount">Amount</Label>
           <Input
             id="amount"
             type="number"
             step="0.01"
-            value={formData.amount}
+            value={displayAmount}
             onChange={(e) => handleInputChange(e, "amount")}
             disabled={isUpdating}
           />
@@ -132,11 +183,11 @@ const TransactionEditForm = ({
               <SelectValue placeholder={formData.category} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Income">Income</SelectItem>
-              <SelectItem value="Expense">Expense</SelectItem>
-              <SelectItem value="Investment">Investment</SelectItem>
-              <SelectItem value="Savings">Savings</SelectItem>
-              <SelectItem value="Other">Other</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.value} value={cat.value}>
+                  {cat.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

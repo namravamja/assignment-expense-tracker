@@ -35,6 +35,10 @@ const TransactionView = ({
   onEdit,
   onDelete,
 }: TransactionViewProps) => {
+  // Display absolute amount value but with proper formatting
+  const displayAmount = Math.abs(transaction.amount);
+  const isIncome = transaction.type === "income";
+
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -70,29 +74,28 @@ const TransactionView = ({
       </CardHeader>
       <CardContent>
         <div className="flex justify-between items-center">
-          <Badge
-            variant={
-              transaction.category?.toLowerCase() === "income"
-                ? "outline"
-                : "secondary"
-            }
-          >
-            {transaction.category || "Uncategorized"}
-          </Badge>
+          <div className="flex gap-2">
+            <Badge variant={isIncome ? "outline" : "secondary"}>
+              {transaction.type === "income" ? "Income" : "Expense"}
+            </Badge>
+            <Badge variant="outline">
+              {transaction.category || "Uncategorized"}
+            </Badge>
+          </div>
           <div className="flex items-center">
-            {transaction.amount > 0 ? (
+            {isIncome ? (
               <ArrowUpRight className="mr-1 h-4 w-4 text-emerald-500" />
             ) : (
               <ArrowDownLeft className="mr-1 h-4 w-4 text-rose-500" />
             )}
             <span
               className={
-                transaction.amount > 0
+                isIncome
                   ? "text-emerald-600 font-medium"
                   : "text-rose-600 font-medium"
               }
             >
-              {formatAmount(transaction.amount)}
+              {formatAmount(displayAmount)}
             </span>
           </div>
         </div>

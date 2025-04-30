@@ -5,7 +5,7 @@ import Transaction from "@/app/(backend)/model/Transaction";
 export async function POST(req: Request) {
   try {
     await connectDB();
-    const { amount, date, description, category } = await req.json();
+    const { amount, date, type, description, category } = await req.json();
 
     if (!amount || !date || !description) {
       return NextResponse.json(
@@ -17,6 +17,7 @@ export async function POST(req: Request) {
     const newTransaction = await Transaction.create({
       amount,
       date,
+      type,
       description,
       category: category || "Uncategorized",
     });
