@@ -3,42 +3,43 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const transactionsApi = createApi({
   reducerPath: "transactionsApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000/api", // Change if needed
+    baseUrl: "http://localhost:3000/api",
   }),
   tagTypes: ["Transactions"],
 
   endpoints: (builder) => ({
     // Fetch all transactions
     getTransactions: builder.query({
-      query: () => "/transactions",
+      query: () => "/Transactions/List",
       providesTags: ["Transactions"],
     }),
 
     // Add a new transaction
     addTransaction: builder.mutation({
-      query: (newTransaction) => ({
-        url: "/transactions",
+      query: (credentials) => ({
+        url: "/Transactions/Insert",
         method: "POST",
-        body: newTransaction,
+        body: credentials,
       }),
       invalidatesTags: ["Transactions"],
     }),
 
     // Update an existing transaction
     updateTransaction: builder.mutation({
-      query: ({ id, ...updatedFields }) => ({
-        url: `/transactions/${id}`,
-        method: "PUT",
-        body: updatedFields,
+      query: (credentials) => ({
+        url: `/Transactions/Update`,
+        method: "PATCH",
+        body: credentials,
       }),
       invalidatesTags: ["Transactions"],
     }),
 
     // Delete a transaction
     deleteTransaction: builder.mutation({
-      query: (id) => ({
-        url: `/transactions/${id}`,
+      query: (credentials) => ({
+        url: `/Transactions/Delete`,
         method: "DELETE",
+        body: credentials,
       }),
       invalidatesTags: ["Transactions"],
     }),

@@ -1,251 +1,159 @@
 "use client";
 
-import { useState, type JSX } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  ArrowUpRight,
-  ArrowDownLeft,
-  MoreHorizontal,
-  Plus,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { useGetTransactionsQuery } from "@/app/lib/Transactions";
+import TransactionCard from "@/app/(frontend)/components/transactions/TransactionCard";
+import DeleteTransactionDialog from "@/app/(frontend)/components/transactions/DeleteTransactionDialog";
+import { Transaction } from "@/types/transaction";
 
-// Define Transaction type
-interface Transaction {
-  id: string;
-  description: string;
-  amount: number;
-  date: string;
-  category: string;
-}
-
-// Sample transaction data
-const sampleTransactions: Transaction[] = [
-  {
-    id: "1",
-    description: "Grocery Shopping",
-    amount: -85.5,
-    date: "2023-05-15",
-    category: "Food",
-  },
-  {
-    id: "2",
-    description: "Salary Deposit",
-    amount: 2500.0,
-    date: "2023-05-01",
-    category: "Income",
-  },
-  {
-    id: "3",
-    description: "Electric Bill",
-    amount: -120.75,
-    date: "2023-05-10",
-    category: "Utilities",
-  },
-  {
-    id: "4",
-    description: "Freelance Payment",
-    amount: 350.0,
-    date: "2023-05-08",
-    category: "Income",
-  },
-];
-
-const Transactions = (): JSX.Element => {
+const TransactionsPage = () => {
   const router = useRouter();
-  const [transactions, setTransactions] =
-    useState<Transaction[]>(sampleTransactions);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [transactionToDelete, setTransactionToDelete] =
     useState<Transaction | null>(null);
 
-  const handleDelete = (id: string): void => {
-    setTransactions(
-      transactions.filter((transaction) => transaction.id !== id)
-    );
-    setDeleteDialogOpen(false);
-  };
+  // RTK Query hook for fetching transactions
+  const {
+    data: responseData,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetTransactionsQuery(undefined);
 
-  const confirmDelete = (transaction: Transaction): void => {
+  // Ensure transactions is always an array
+  const transactions = Array.isArray(responseData)
+    ? responseData
+    : responseData?.transactions || responseData?.data || [];
+
+  const handleDeleteRequest = (transaction: Transaction) => {
     setTransactionToDelete(transaction);
     setDeleteDialogOpen(true);
   };
 
-  const formatDate = (dateString: string): string => {
-    const options: Intl.DateTimeFormatOptions = {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+  const handleDeleteSuccess = () => {
+    toast.success("Transaction deleted successfully");
+    setDeleteDialogOpen(false);
+    setTransactionToDelete(null);
   };
 
-  const formatAmount = (amount: number): string => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
+  const handleDeleteError = (error: any) => {
+    toast.error("Failed to delete transaction");
+    console.error("Delete error:", error);
   };
+
+  if (isLoading) {
+    return <LoadingState />;
+  }
+
+  if (isError) {
+    return <ErrorState onRetry={refetch} />;
+  }
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Transactions</h1>
-          <p className="text-muted-foreground">
-            View and manage your recent transactions
-          </p>
+      <PageHeader />
+
+      {Array.isArray(transactions) && transactions.length > 0 ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {transactions.map((transaction: Transaction) => (
+            <TransactionCard
+              key={
+                transaction._id ||
+                `transaction-${Math.random().toString(36).substr(2, 9)}`
+              }
+              transaction={transaction}
+              onDeleteRequest={handleDeleteRequest}
+              onUpdateSuccess={() =>
+                toast.success("Transaction updated successfully")
+              }
+              onUpdateError={(error) => {
+                toast.error("Failed to update transaction");
+                console.error("Update error:", error);
+              }}
+            />
+          ))}
         </div>
-        <Button
-          onClick={() => router.push("/add-transaction")}
-          className="gap-2"
-        >
-          <Plus className="h-4 w-4" /> Add Transaction
-        </Button>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {transactions.map((transaction) => (
-          <Card key={transaction.id} className="overflow-hidden">
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg">
-                    {transaction.description}
-                  </CardTitle>
-                  <CardDescription>
-                    {formatDate(transaction.date)}
-                  </CardDescription>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Open menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={() =>
-                        router.push(`/edit-transaction/${transaction.id}`)
-                      }
-                    >
-                      <Pencil className="mr-2 h-4 w-4" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      className="text-destructive focus:text-destructive"
-                      onClick={() => confirmDelete(transaction)}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center">
-                <Badge
-                  variant={
-                    transaction.category === "Income" ? "outline" : "secondary"
-                  }
-                >
-                  {transaction.category}
-                </Badge>
-                <div className="flex items-center">
-                  {transaction.amount > 0 ? (
-                    <ArrowUpRight className="mr-1 h-4 w-4 text-emerald-500" />
-                  ) : (
-                    <ArrowDownLeft className="mr-1 h-4 w-4 text-rose-500" />
-                  )}
-                  <span
-                    className={
-                      transaction.amount > 0
-                        ? "text-emerald-600 font-medium"
-                        : "text-rose-600 font-medium"
-                    }
-                  >
-                    {formatAmount(transaction.amount)}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {transactions.length === 0 && (
-        <Card className="w-full">
-          <CardContent className="flex flex-col items-center justify-center py-10">
-            <p className="text-muted-foreground mb-4">No transactions found</p>
-            <Button
-              onClick={() => router.push("/add-transaction")}
-              variant="outline"
-              className="gap-2"
-            >
-              <Plus className="h-4 w-4" /> Add your first transaction
-            </Button>
-          </CardContent>
-        </Card>
+      ) : (
+        <EmptyState />
       )}
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              transaction
-              {transactionToDelete &&
-                ` "${transactionToDelete.description}"`}{" "}
-              from your account.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() =>
-                transactionToDelete && handleDelete(transactionToDelete.id)
-              }
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteTransactionDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        transaction={transactionToDelete}
+        onSuccess={handleDeleteSuccess}
+        onError={handleDeleteError}
+      />
     </div>
   );
 };
 
-export default Transactions;
+const PageHeader = () => {
+  const router = useRouter();
+
+  return (
+    <div className="flex justify-between items-center">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Transactions</h1>
+        <p className="text-muted-foreground">
+          View and manage your recent transactions
+        </p>
+      </div>
+      <Button
+        onClick={() => router.push("/AddTransaction")}
+        className="gap-2 hover:cursor-pointer"
+      >
+        <Plus className="h-4 w-4" /> Add Transaction
+      </Button>
+    </div>
+  );
+};
+
+const LoadingState = () => (
+  <div className="container mx-auto py-6 flex justify-center items-center min-h-[50vh]">
+    <div className="flex flex-col items-center gap-2">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <p className="text-muted-foreground">Loading transactions...</p>
+    </div>
+  </div>
+);
+
+const ErrorState = ({ onRetry }: { onRetry: () => void }) => (
+  <div className="container mx-auto py-6">
+    <Card className="w-full">
+      <CardContent className="flex flex-col items-center justify-center py-10">
+        <p className="text-destructive mb-4">Error loading transactions</p>
+        <Button onClick={onRetry} className="gap-2">
+          Try Again
+        </Button>
+      </CardContent>
+    </Card>
+  </div>
+);
+
+const EmptyState = () => {
+  const router = useRouter();
+
+  return (
+    <Card className="w-full">
+      <CardContent className="flex flex-col items-center justify-center py-10">
+        <p className="text-muted-foreground mb-4">No transactions found</p>
+        <Button
+          onClick={() => router.push("/AddTransaction")}
+          variant="outline"
+          className="gap-2"
+        >
+          <Plus className="h-4 w-4" /> Add your first transaction
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default TransactionsPage;

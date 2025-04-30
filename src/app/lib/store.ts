@@ -1,6 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { transactionsApi } from "./Transactions";
-// Add other API slices as needed
 
 export const makeStore = () =>
   configureStore({

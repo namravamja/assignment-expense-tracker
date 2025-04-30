@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
 
-const MONGO_URI = process.env.MONGO_URI as string;
+const MONGODB_URI = process.env.MONGODB_URI as string;
 
 export const connectDB = async () => {
   try {
-    if (!MONGO_URI) {
+    if (!MONGODB_URI) {
       throw new Error("MongoDB URI is missing!");
     }
 
-    await mongoose.connect(MONGO_URI, {
+    await mongoose.connect(MONGODB_URI, {
       serverSelectionTimeoutMS: 5000,
     });
 
