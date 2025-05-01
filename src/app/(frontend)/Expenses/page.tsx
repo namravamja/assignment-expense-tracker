@@ -3,7 +3,9 @@ import TransactionGraph from "../components/transactions/TransactionGraph";
 const Expenses = () => {
   return (
     <>
-      <TransactionGraph />
+      <div className="w-full flex flex-col items-center justify-center py-6">
+        <TransactionGraph />
+      </div>
     </>
   );
 };

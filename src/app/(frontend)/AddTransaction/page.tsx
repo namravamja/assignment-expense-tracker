@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarIcon } from "lucide-react";
@@ -60,6 +59,9 @@ function AddTransaction() {
     "expense"
   );
 
+  // Formatted date state
+  const [formattedDate, setFormattedDate] = useState("");
+
   // RTK Query mutation hook
   const [addTransaction, { isLoading: isSubmitting }] =
     useAddTransactionMutation();
@@ -78,6 +80,18 @@ function AddTransaction() {
       setTransactionType(numAmount < 0 ? "expense" : "income");
     }
   }, [amount]);
+
+  // Format date on client side to prevent hydration mismatch
+  useEffect(() => {
+    if (date) {
+      const formatted = date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      setFormattedDate(formatted);
+    }
+  }, [date]);
 
   // Form submission handler
   async function handleSubmit(e: React.FormEvent) {
@@ -215,19 +229,10 @@ function AddTransaction() {
                       id="date"
                       variant={"outline"}
                       className={`w-full pl-3 text-left font-normal ${
-                        !date ? "text-muted-foreground" : ""
+                        !formattedDate ? "text-muted-foreground" : ""
                       }`}
                     >
-                      {date ? (
-                        date.toLocaleDateString(undefined, {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-
+                      {formattedDate || <span>Pick a date</span>}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </PopoverTrigger>

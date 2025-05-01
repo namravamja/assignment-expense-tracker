@@ -8,7 +8,7 @@ export async function GET(req: Request) {
   try {
     const transactions = await Transaction.find();
 
-    return NextResponse.json({ success: true, transactions }, { status: 200 });
+    return NextResponse.json(transactions, { status: 200 });
   } catch (error) {
     console.error("Error fetching transactions:", error);
     return NextResponse.json(

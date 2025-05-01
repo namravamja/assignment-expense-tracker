@@ -44,14 +44,9 @@ export const navItems: NavItem[] = [
     icon: Receipt,
   },
   {
-    title: "Reports",
-    href: "/reports",
+    title: "Categories",
+    href: "/Categories",
     icon: FileText,
-  },
-  {
-    title: "Advances",
-    href: "/advances",
-    icon: Clock,
   },
 ];
 

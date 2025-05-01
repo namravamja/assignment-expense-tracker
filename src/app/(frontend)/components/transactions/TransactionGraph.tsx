@@ -26,12 +26,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useGetTransactionsQuery } from "@/app/lib/Transactions";
+import { Badge } from "@/components/ui/badge";
 
 // Transaction type
 interface Transaction {
   date: string;
   amount: number;
   type: "income" | "expense";
+  category?: string; // Added category field
 }
 
 // Graph data type
@@ -64,12 +66,21 @@ export default function TransactionGraph() {
   const [totalIncome, setTotalIncome] = useState<number>(0);
   const [totalExpense, setTotalExpense] = useState<number>(0);
 
-  // Extract unique months from transactions
+  // New states for category filtering
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+
+  // Extract unique months and categories from transactions
   useEffect(() => {
     if (!Array.isArray(transactions)) return;
 
+    // Process months
     const monthsMap = new Map<string, string>();
+    // Process categories
+    const categoriesSet = new Set<string>();
+
     transactions.forEach((transaction) => {
+      // Process month data
       const date = new Date(transaction.date);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -79,22 +90,37 @@ export default function TransactionGraph() {
         year: "numeric",
       });
       monthsMap.set(value, label);
+
+      // Process category data
+      if (transaction.category) {
+        categoriesSet.add(transaction.category);
+      }
     });
 
     const monthsArray = Array.from(monthsMap.entries())
       .sort((a, b) => b[0].localeCompare(a[0]))
       .map(([value, label]) => ({ value, label }));
 
-    // ✅ Only update if changed
-    const isDifferent =
+    // Update available months if changed
+    const monthsDifferent =
       availableMonths.length !== monthsArray.length ||
       availableMonths.some((m, i) => m.value !== monthsArray[i].value);
 
-    if (isDifferent) {
+    if (monthsDifferent) {
       setAvailableMonths(monthsArray);
     }
 
-    // ✅ Set default month if not set
+    // Update available categories if changed
+    const categoriesArray = Array.from(categoriesSet).sort();
+    const categoriesDifferent =
+      availableCategories.length !== categoriesArray.length ||
+      availableCategories.some((c, i) => c !== categoriesArray[i]);
+
+    if (categoriesDifferent) {
+      setAvailableCategories(categoriesArray);
+    }
+
+    // Set default month if not set
     if (!monthYear && monthsArray.length > 0) {
       setMonthYear(monthsArray[0].value);
     }
@@ -120,14 +146,23 @@ export default function TransactionGraph() {
     }
   }, [transactions]);
 
-  // Process graph data
+  // Process graph data with category filtering
   useEffect(() => {
     if (!monthYear || transactions.length === 0) return;
 
     const [year, month] = monthYear.split("-").map(Number);
+
+    // Filter transactions by selected month and category
     const filteredTransactions = transactions.filter((transaction) => {
       const date = new Date(transaction.date);
-      return date.getFullYear() === year && date.getMonth() === month - 1;
+      const matchesMonth =
+        date.getFullYear() === year && date.getMonth() === month - 1;
+
+      // If "all" is selected or the transaction matches the selected category
+      const matchesCategory =
+        selectedCategory === "all" || transaction.category === selectedCategory;
+
+      return matchesMonth && matchesCategory;
     });
 
     const daysInMonth = new Date(year, month, 0).getDate();
@@ -161,7 +196,7 @@ export default function TransactionGraph() {
     setGraphData(sorted);
     setTotalIncome(totalIn);
     setTotalExpense(totalOut);
-  }, [monthYear, transactions]);
+  }, [monthYear, transactions, selectedCategory]);
 
   if (isLoading) {
     return (
@@ -187,23 +222,47 @@ export default function TransactionGraph() {
         <div>
           <CardTitle>Transaction Overview</CardTitle>
           <CardDescription>
-            View your income and expenses by month
+            View your income and expenses by month and category
           </CardDescription>
         </div>
-        <Select value={monthYear} onValueChange={setMonthYear}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Select Month" />
-          </SelectTrigger>
-          <SelectContent>
-            {availableMonths.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2">
+          <Select value={monthYear} onValueChange={setMonthYear}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Select Month" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableMonths.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Select Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {availableCategories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
+        {selectedCategory !== "all" && (
+          <div className="mb-4">
+            <Badge variant="outline" className="text-sm">
+              Filtered by: {selectedCategory}
+            </Badge>
+          </div>
+        )}
+
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
