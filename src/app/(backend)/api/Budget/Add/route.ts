@@ -2,6 +2,23 @@ import { NextResponse } from "next/server";
 import { connectDB } from "../../../config/db";
 import Budget from "@/app/(backend)/model/Budget";
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*", // Or set to your frontend domain
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+// Handle CORS preflight request
+export async function OPTIONS() {
+  return NextResponse.json(
+    {},
+    {
+      status: 200,
+      headers: CORS_HEADERS,
+    }
+  );
+}
+
 export async function POST(request: Request) {
   try {
     await connectDB();
@@ -12,19 +29,23 @@ export async function POST(request: Request) {
     if (!category || maxAmount === undefined) {
       return NextResponse.json(
         { error: "Category and maxAmount are required" },
-        { status: 400 }
+        {
+          status: 400,
+          headers: CORS_HEADERS,
+        }
       );
     }
 
-    // Create new budget
     const budget = await Budget.create({
       category,
       maxAmount,
     });
 
-    return NextResponse.json(budget, { status: 201 });
+    return NextResponse.json(budget, {
+      status: 201,
+      headers: CORS_HEADERS,
+    });
   } catch (error: unknown) {
-    // Check for MongoDB duplicate key error
     if (
       typeof error === "object" &&
       error !== null &&
@@ -33,15 +54,20 @@ export async function POST(request: Request) {
     ) {
       return NextResponse.json(
         { error: "Budget for this category already exists" },
-        { status: 409 }
+        {
+          status: 409,
+          headers: CORS_HEADERS,
+        }
       );
     }
 
-    // General error handling
     const err = error as { message?: string };
     return NextResponse.json(
       { error: err.message || "Failed to add budget" },
-      { status: 500 }
+      {
+        status: 500,
+        headers: CORS_HEADERS,
+      }
     );
   }
 }
