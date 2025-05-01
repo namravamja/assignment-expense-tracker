@@ -1,9 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
+const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+
 export const budgetApi = createApi({
   reducerPath: "budgetApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000/api",
+    baseUrl: baseUrl,
   }),
   tagTypes: ["Budget"],
 
