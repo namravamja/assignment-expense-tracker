@@ -3,7 +3,7 @@ import { connectDB } from "../../../config/db";
 import Budget from "@/app/(backend)/model/Budget";
 
 const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*", // Or set to your frontend domain
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };

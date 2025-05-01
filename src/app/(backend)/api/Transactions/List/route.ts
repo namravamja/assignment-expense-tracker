@@ -3,7 +3,7 @@ import { connectDB } from "../../../config/db";
 import Transaction from "@/app/(backend)/model/Transaction";
 
 const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*", // Change to your frontend domain in production
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
