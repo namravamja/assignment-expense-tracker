@@ -9,10 +9,13 @@ const CORS_HEADERS = {
 };
 
 export async function OPTIONS() {
-  return NextResponse.json({}, {
-    status: 200,
-    headers: CORS_HEADERS,
-  });
+  return NextResponse.json(
+    {},
+    {
+      status: 200,
+      headers: CORS_HEADERS,
+    }
+  );
 }
 
 export async function GET() {

@@ -9,13 +9,17 @@ const CORS_HEADERS = {
 };
 
 export async function OPTIONS() {
-  return NextResponse.json({}, {
-    status: 200,
-    headers: CORS_HEADERS,
-  });
+  return NextResponse.json(
+    {},
+    {
+      status: 200,
+      headers: CORS_HEADERS,
+    }
+  );
 }
 
 export async function DELETE(req: Request) {
+  await connectDB();
   try {
     const { _id } = await req.json();
     if (!_id) {
@@ -34,11 +38,14 @@ export async function DELETE(req: Request) {
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      message: "Transaction deleted successfully",
-      data: deletedTransaction,
-    }, { status: 200, headers: CORS_HEADERS });
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Transaction deleted successfully",
+        data: deletedTransaction,
+      },
+      { status: 200, headers: CORS_HEADERS }
+    );
   } catch (error) {
     console.error("Error deleting transaction:", error);
     return NextResponse.json(
