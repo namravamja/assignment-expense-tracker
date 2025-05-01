@@ -10,9 +10,10 @@ export async function GET() {
     const budgets = await Budget.find({}).sort({ createdAt: -1 });
 
     return NextResponse.json(budgets, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
     return NextResponse.json(
-      { error: error.message || "Failed to fetch budgets" },
+      { error: err.message || "Failed to fetch budgets" },
       { status: 500 }
     );
   }

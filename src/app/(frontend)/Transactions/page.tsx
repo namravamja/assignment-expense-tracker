@@ -13,7 +13,6 @@ import DeleteTransactionDialog from "@/app/(frontend)/components/transactions/De
 import { Transaction } from "@/types/transaction";
 
 const TransactionsPage = () => {
-  const router = useRouter();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [transactionToDelete, setTransactionToDelete] =
     useState<Transaction | null>(null);
@@ -42,7 +41,7 @@ const TransactionsPage = () => {
     setTransactionToDelete(null);
   };
 
-  const handleDeleteError = (error: any) => {
+  const handleDeleteError = (error: Error | unknown) => {
     toast.error("Failed to delete transaction");
     console.error("Delete error:", error);
   };

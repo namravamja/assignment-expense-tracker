@@ -10,9 +10,14 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  TooltipProps,
 } from "recharts";
 import { ComparisonData } from "@/types/budget";
 import { formatCurrency } from "@/lib/formatters";
+import {
+  ValueType,
+  NameType,
+} from "recharts/types/component/DefaultTooltipContent";
 
 interface BudgetComparisonChartProps {
   data: ComparisonData[];
@@ -22,28 +27,34 @@ const BudgetComparisonChart: React.FC<BudgetComparisonChartProps> = ({
   data,
 }) => {
   // Custom tooltip for the chart
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+  }: TooltipProps<ValueType, NameType>) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-4 border rounded shadow">
           <p className="font-bold">{label}</p>
           <p className="text-blue-500">
-            Budget: {formatCurrency(payload[0].value)}
+            Budget: {formatCurrency(Number(payload[0].value))}
           </p>
           <p className="text-red-500">
-            Actual: {formatCurrency(payload[1].value)}
+            Actual: {formatCurrency(Number(payload[1].value))}
           </p>
           <p className="text-green-500">
-            Remaining: {formatCurrency(payload[2].value)}
+            Remaining: {formatCurrency(Number(payload[2].value))}
           </p>
           <p className="text-gray-600">
-            {payload[1].value > payload[0].value
+            {Number(payload[1].value) > Number(payload[0].value)
               ? `${Math.round(
-                  ((payload[1].value - payload[0].value) / payload[0].value) *
+                  ((Number(payload[1].value) - Number(payload[0].value)) /
+                    Number(payload[0].value)) *
                     100
                 )}% over budget`
               : `${Math.round(
-                  ((payload[0].value - payload[1].value) / payload[0].value) *
+                  ((Number(payload[0].value) - Number(payload[1].value)) /
+                    Number(payload[0].value)) *
                     100
                 )}% under budget`}
           </p>

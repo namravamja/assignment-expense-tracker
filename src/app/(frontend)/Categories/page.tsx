@@ -19,13 +19,27 @@ import {
   CardContent,
 } from "@/components/ui/card";
 
-// Define types - moved to a separate types file
 import { ComparisonData } from "@/types/budget";
+
+// Define expected types
+type Transaction = {
+  amount: number;
+  date: string;
+  type: "income" | "expense";
+  description: string;
+  category: string;
+  _id?: string;
+};
+
+type BudgetType = {
+  _id: string;
+  category: string;
+  maxAmount: number;
+};
 
 const Categories = () => {
   const [comparisonData, setComparisonData] = useState<ComparisonData[]>([]);
 
-  // RTK query hooks
   const { data: budgets, isLoading: budgetsLoading } =
     useGetBudgetQuery(undefined);
   const { data: transactions, isLoading: transactionsLoading } =
@@ -33,13 +47,11 @@ const Categories = () => {
   const [addBudget] = useAddBudgetMutation();
   const [deleteBudget] = useDeleteBudgetMutation();
 
-  // Prepare comparison data when budgets or transactions change
   useEffect(() => {
     if (budgets && transactions) {
-      // Calculate total expenses by category
       const expensesByCategory: Record<string, number> = {};
 
-      transactions.forEach((transaction: any) => {
+      (transactions as Transaction[]).forEach((transaction) => {
         if (transaction.type === "expense") {
           const category = transaction.category;
           expensesByCategory[category] =
@@ -47,15 +59,13 @@ const Categories = () => {
         }
       });
 
-      // Make sure budgets is an array
-      const budgetsArray = Array.isArray(budgets)
+      const budgetsArray: BudgetType[] = Array.isArray(budgets)
         ? budgets
-        : budgets.data && Array.isArray(budgets.data)
+        : Array.isArray(budgets?.data)
         ? budgets.data
         : [];
 
-      // Create comparison data
-      const comparison = budgetsArray.map((budget: any) => {
+      const comparison: ComparisonData[] = budgetsArray.map((budget) => {
         const actualExpense = expensesByCategory[budget.category] || 0;
         const remaining = budget.maxAmount - actualExpense;
         const percentUsed =
@@ -71,8 +81,8 @@ const Categories = () => {
             budget.category.charAt(0).toUpperCase() + budget.category.slice(1),
           budget: budget.maxAmount,
           actual: actualExpense,
-          remaining: remaining,
-          percentUsed: percentUsed,
+          remaining,
+          percentUsed,
         };
       });
 
@@ -80,8 +90,7 @@ const Categories = () => {
     }
   }, [budgets, transactions]);
 
-  // Handle form submission
-  const handleAddBudget = async (category: any, amount: any) => {
+  const handleAddBudget = async (category: string, amount: string) => {
     try {
       await addBudget({
         category,
@@ -94,8 +103,7 @@ const Categories = () => {
     }
   };
 
-  // Handle budget deletion
-  const handleDeleteBudget = async (budgetId: any) => {
+  const handleDeleteBudget = async (budgetId: string) => {
     try {
       await deleteBudget({ id: budgetId }).unwrap();
       return true;
@@ -108,63 +116,58 @@ const Categories = () => {
   const isLoading = budgetsLoading || transactionsLoading;
 
   return (
-    <>
-      {/* Two column layout with more control */}
-      <div className="flex flex-col lg:flex-row gap-6 mt-10 items-start">
-        {/* Left column - Budget management */}
-        <div className="space-y-6 w-96">
-          <BudgetForm onSubmit={handleAddBudget} />
+    <div className="flex flex-col lg:flex-row gap-6 mt-10 items-start">
+      <div className="space-y-6 w-96">
+        <BudgetForm onSubmit={handleAddBudget} />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Budget Allocation</CardTitle>
-              <CardDescription>Manage your budget categories</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <BudgetTable
-                budgets={Array.isArray(budgets) ? budgets : budgets?.data || []}
-                isLoading={budgetsLoading}
-                onDelete={handleDeleteBudget}
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right column - Budget vs Actual comparison */}
-        <div className="flex-1">
-          <Card className="h-full">
-            <CardHeader>
-              <CardTitle>Budget vs Actual Expenses</CardTitle>
-              <CardDescription>
-                Comparison of your budgeted amounts with actual spending
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="text-center py-8">Loading data...</div>
-              ) : comparisonData.length > 0 ? (
-                <div className="space-y-6">
-                  <div className="h-80">
-                    <BudgetComparisonChart data={comparisonData} />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium mb-2">
-                      Budget Usage Summary
-                    </h3>
-                    <BudgetUsageSummary data={comparisonData} />
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  No budget comparison data available. Please add budget
-                  categories and record your expenses.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Budget Allocation</CardTitle>
+            <CardDescription>Manage your budget categories</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <BudgetTable
+              budgets={Array.isArray(budgets) ? budgets : budgets?.data || []}
+              isLoading={budgetsLoading}
+              onDelete={handleDeleteBudget}
+            />
+          </CardContent>
+        </Card>
       </div>
-    </>
+
+      <div className="flex-1">
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle>Budget vs Actual Expenses</CardTitle>
+            <CardDescription>
+              Comparison of your budgeted amounts with actual spending
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="text-center py-8">Loading data...</div>
+            ) : comparisonData.length > 0 ? (
+              <div className="space-y-6">
+                <div className="h-80">
+                  <BudgetComparisonChart data={comparisonData} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium mb-2">
+                    Budget Usage Summary
+                  </h3>
+                  <BudgetUsageSummary data={comparisonData} />
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No budget comparison data available. Please add budget
+                categories and record your expenses.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 

@@ -8,7 +8,6 @@ import {
   Briefcase,
   Receipt,
   FileText,
-  Clock,
   Menu,
   LucideIcon,
 } from "lucide-react";

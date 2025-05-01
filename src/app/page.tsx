@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowRight, PlusCircle, BarChart3 } from "lucide-react";
+import { PlusCircle, BarChart3 } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();

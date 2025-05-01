@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -29,13 +29,13 @@ import { useGetTransactionsQuery } from "@/app/lib/Transactions";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/formatters";
 
-// Transaction type
-interface Transaction {
+// Transaction type - used for transactions data structure
+type Transaction = {
   date: string;
   amount: number;
   type: "income" | "expense";
   category?: string; // Added category field
-}
+};
 
 // Graph data type
 interface GraphData {
@@ -47,9 +47,10 @@ interface GraphData {
 export default function TransactionGraph() {
   const { data, isLoading, isError } = useGetTransactionsQuery(undefined);
 
-  const transactions: Transaction[] = Array.isArray(data)
-    ? data
-    : data?.transactions ?? [];
+  // Use useMemo to prevent recreating this array on every render
+  const transactions = useMemo(() => {
+    return Array.isArray(data) ? data : data?.transactions ?? [];
+  }, [data]);
 
   const [availableMonths, setAvailableMonths] = useState<
     { value: string; label: string }[]
@@ -72,7 +73,7 @@ export default function TransactionGraph() {
     // Process categories
     const categoriesSet = new Set<string>();
 
-    transactions.forEach((transaction) => {
+    transactions.forEach((transaction: Transaction) => {
       // Process month data
       const date = new Date(transaction.date);
       const year = date.getFullYear();
@@ -137,7 +138,7 @@ export default function TransactionGraph() {
         ]);
       }
     }
-  }, [transactions]);
+  }, [transactions, availableMonths, availableCategories, monthYear]);
 
   // Process graph data with category filtering
   useEffect(() => {
@@ -146,17 +147,20 @@ export default function TransactionGraph() {
     const [year, month] = monthYear.split("-").map(Number);
 
     // Filter transactions by selected month and category
-    const filteredTransactions = transactions.filter((transaction) => {
-      const date = new Date(transaction.date);
-      const matchesMonth =
-        date.getFullYear() === year && date.getMonth() === month - 1;
+    const filteredTransactions = transactions.filter(
+      (transaction: Transaction) => {
+        const date = new Date(transaction.date);
+        const matchesMonth =
+          date.getFullYear() === year && date.getMonth() === month - 1;
 
-      // If "all" is selected or the transaction matches the selected category
-      const matchesCategory =
-        selectedCategory === "all" || transaction.category === selectedCategory;
+        // If "all" is selected or the transaction matches the selected category
+        const matchesCategory =
+          selectedCategory === "all" ||
+          transaction.category === selectedCategory;
 
-      return matchesMonth && matchesCategory;
-    });
+        return matchesMonth && matchesCategory;
+      }
+    );
 
     const daysInMonth = new Date(year, month, 0).getDate();
     const dailyData: { [key: string]: GraphData } = {};
@@ -170,7 +174,7 @@ export default function TransactionGraph() {
       };
     }
 
-    filteredTransactions.forEach((t) => {
+    filteredTransactions.forEach((t: Transaction) => {
       const day = String(new Date(t.date).getDate()).padStart(2, "0");
       if (t.type === "income") {
         dailyData[day].income += Math.abs(t.amount);

@@ -23,17 +23,24 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(budget, { status: 201 });
-  } catch (error: any) {
-    // Handle duplicate key error
-    if (error.code === 11000) {
+  } catch (error: unknown) {
+    // Check for MongoDB duplicate key error
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code: number }).code === 11000
+    ) {
       return NextResponse.json(
         { error: "Budget for this category already exists" },
         { status: 409 }
       );
     }
 
+    // General error handling
+    const err = error as { message?: string };
     return NextResponse.json(
-      { error: error.message || "Failed to add budget" },
+      { error: err.message || "Failed to add budget" },
       { status: 500 }
     );
   }

@@ -2,17 +2,18 @@ import { NextResponse } from "next/server";
 import { connectDB } from "../../../config/db";
 import Transaction from "@/app/(backend)/model/Transaction";
 
-connectDB();
-
-export async function GET(req: Request) {
+export async function GET() {
   try {
+    await connectDB();
+
     const transactions = await Transaction.find();
 
     return NextResponse.json(transactions, { status: 200 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error fetching transactions:", error);
+    const err = error as { message?: string };
     return NextResponse.json(
-      { success: false, error: (error as Error).message },
+      { success: false, error: err.message || "Failed to fetch transactions." },
       { status: 500 }
     );
   }

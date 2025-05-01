@@ -24,9 +24,10 @@ export async function DELETE(request: Request) {
     }
 
     return NextResponse.json({ success: true }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
     return NextResponse.json(
-      { error: error.message || "Failed to delete budget" },
+      { error: err.message || "Failed to delete budget" },
       { status: 500 }
     );
   }

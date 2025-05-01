@@ -11,13 +11,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query"; // Import for proper error typing
 
 interface DeleteTransactionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   transaction: Transaction | null;
   onSuccess: () => void;
-  onError: (error: any) => void;
+  onError: (error: unknown | FetchBaseQueryError) => void; // Updated error type
 }
 
 const DeleteTransactionDialog = ({

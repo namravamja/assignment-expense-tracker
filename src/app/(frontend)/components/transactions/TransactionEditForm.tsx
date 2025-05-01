@@ -128,9 +128,7 @@ const TransactionEditForm = ({
           <Label>Transaction Type</Label>
           <RadioGroup
             value={formData.type}
-            onValueChange={(value: any) =>
-              handleTypeChange(value as TransactionType)
-            }
+            onValueChange={(value: TransactionType) => handleTypeChange(value)} // Correct type here
             className="flex space-x-4"
             disabled={isUpdating}
           >

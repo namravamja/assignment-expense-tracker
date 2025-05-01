@@ -10,7 +10,7 @@ interface TransactionCardProps {
   transaction: Transaction;
   onDeleteRequest: (transaction: Transaction) => void;
   onUpdateSuccess: () => void;
-  onUpdateError: (error: any) => void;
+  onUpdateError: (error: unknown) => void; // Changed to 'unknown'
 }
 
 const TransactionCard = ({
@@ -52,7 +52,7 @@ const TransactionCard = ({
         onUpdateSuccess();
         setIsEditing(false);
         setEditFormData(null);
-      } catch (error) {
+      } catch (error: unknown) {
         onUpdateError(error);
       }
     }

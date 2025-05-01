@@ -26,10 +26,11 @@ export async function POST(req: Request) {
       { message: "Transaction added", transaction: newTransaction },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error adding transaction:", error);
+    const err = error as { message?: string };
     return NextResponse.json(
-      { error: error.message || "Something went wrong." },
+      { error: err.message || "Something went wrong." },
       { status: 500 }
     );
   }
