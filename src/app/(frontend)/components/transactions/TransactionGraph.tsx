@@ -215,16 +215,18 @@ export default function TransactionGraph() {
 
   return (
     <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <CardHeader className="flex flex-col space-y-2 pb-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <CardTitle>Transaction Overview</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-lg sm:text-xl">
+            Transaction Overview
+          </CardTitle>
+          <CardDescription className="text-sm">
             View your income and expenses by month and category
           </CardDescription>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col space-y-2 sm:flex-row sm:gap-2 sm:space-y-0">
           <Select value={monthYear} onValueChange={setMonthYear}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue placeholder="Select Month" />
             </SelectTrigger>
             <SelectContent>
@@ -237,7 +239,7 @@ export default function TransactionGraph() {
           </Select>
 
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue placeholder="Select Category" />
             </SelectTrigger>
             <SelectContent>
@@ -251,6 +253,7 @@ export default function TransactionGraph() {
           </Select>
         </div>
       </CardHeader>
+
       <CardContent>
         {selectedCategory !== "all" && (
           <div className="mb-4">
@@ -260,14 +263,23 @@ export default function TransactionGraph() {
           </div>
         )}
 
-        <div className="h-80">
+        <div className="h-60 sm:h-72 md:h-80">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={graphData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              margin={{
+                top: 10,
+                right: 10,
+                left: 0,
+                bottom: 5,
+              }}
             >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
+              <XAxis
+                dataKey="day"
+                tick={{ fontSize: "0.75rem" }}
+                tickCount={graphData.length > 15 ? 5 : undefined} // Show fewer ticks on small screens
+              />
               <YAxis
                 tickFormatter={(value) =>
                   value === 0
@@ -276,12 +288,18 @@ export default function TransactionGraph() {
                     ? `${(value / 1000).toFixed(1)}k`
                     : value
                 }
+                tick={{ fontSize: "0.75rem" }}
+                width={40}
               />
               <Tooltip
                 formatter={(value: number) => formatCurrency(value)}
                 labelFormatter={(label: string) => `Day ${label}`}
+                contentStyle={{ fontSize: "0.875rem" }}
               />
-              <Legend />
+              <Legend
+                wrapperStyle={{ fontSize: "0.75rem", paddingTop: "5px" }}
+                iconSize={12}
+              />
               <Bar dataKey="income" name="Income" fill="#4ade80" />
               <Bar dataKey="expense" name="Expense" fill="#f87171" />
             </BarChart>
@@ -289,37 +307,37 @@ export default function TransactionGraph() {
         </div>
 
         {/* Monthly Summary Section */}
-        <div className="mt-6 grid grid-cols-3 gap-4">
-          <div className="rounded-lg bg-green-50 p-4">
-            <div className="text-sm font-medium text-green-800">
+        <div className="mt-4 md:mt-6 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-4">
+          <div className="rounded-lg bg-green-50 p-3 md:p-4">
+            <div className="text-xs md:text-sm font-medium text-green-800">
               Total Income
             </div>
-            <div className="mt-1 text-2xl font-bold text-green-700">
+            <div className="mt-1 text-lg md:text-2xl font-bold text-green-700">
               {formatCurrency(totalIncome)}
             </div>
           </div>
-          <div className="rounded-lg bg-red-50 p-4">
-            <div className="text-sm font-medium text-red-800">
+          <div className="rounded-lg bg-red-50 p-3 md:p-4">
+            <div className="text-xs md:text-sm font-medium text-red-800">
               Total Expenses
             </div>
-            <div className="mt-1 text-2xl font-bold text-red-700">
+            <div className="mt-1 text-lg md:text-2xl font-bold text-red-700">
               {formatCurrency(totalExpense)}
             </div>
           </div>
           <div
-            className={`rounded-lg p-4 ${
+            className={`rounded-lg p-3 md:p-4 ${
               remainingAmount >= 0 ? "bg-blue-50" : "bg-amber-50"
             }`}
           >
             <div
-              className={`text-sm font-medium ${
+              className={`text-xs md:text-sm font-medium ${
                 remainingAmount >= 0 ? "text-blue-800" : "text-amber-800"
               }`}
             >
               Remaining Amount
             </div>
             <div
-              className={`mt-1 text-2xl font-bold ${
+              className={`mt-1 text-lg md:text-2xl font-bold ${
                 remainingAmount >= 0 ? "text-blue-700" : "text-amber-700"
               }`}
             >

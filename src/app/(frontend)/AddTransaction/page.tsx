@@ -50,10 +50,14 @@ const categories = [
 function AddTransaction() {
   const router = useRouter();
 
+  // Get current date for validation
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normalize to start of day for correct comparisons
+
   // Form state
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-  const [date, setDate] = useState<Date>(new Date());
+  const [date, setDate] = useState<Date>(today);
   const [category, setCategory] = useState("");
   const [transactionType, setTransactionType] = useState<"income" | "expense">(
     "expense"
@@ -71,6 +75,7 @@ function AddTransaction() {
     description: "",
     amount: "",
     category: "",
+    date: "",
   });
 
   // Update transaction type based on amount input
@@ -93,6 +98,13 @@ function AddTransaction() {
     }
   }, [date]);
 
+  // Function to check if a date is in the future
+  const isFutureDate = (dateToCheck: Date): boolean => {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // Normalize to start of day
+    return dateToCheck > currentDate;
+  };
+
   // Form submission handler
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -102,6 +114,7 @@ function AddTransaction() {
       description: description ? "" : "Description is required",
       amount: amount ? "" : "Amount is required",
       category: category ? "" : "Category is required",
+      date: isFutureDate(date) ? "Future dates are not allowed" : "",
     };
 
     setErrors(newErrors);
@@ -138,10 +151,23 @@ function AddTransaction() {
     }
   }
 
-  // Handle date selection with proper type handling
+  // Handle date selection with proper type handling and future date validation
   const handleDateSelect = (selectedDate: Date | undefined) => {
     if (selectedDate) {
       setDate(selectedDate);
+
+      // Clear date error if valid date selected
+      if (isFutureDate(selectedDate)) {
+        setErrors((prev) => ({
+          ...prev,
+          date: "Future dates are not allowed",
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          date: "",
+        }));
+      }
     }
   };
 
@@ -241,10 +267,19 @@ function AddTransaction() {
                       mode="single"
                       selected={date}
                       onSelect={handleDateSelect}
+                      disabled={(dateToDisable) => {
+                        return isFutureDate(dateToDisable);
+                      }}
                       initialFocus
                     />
                   </PopoverContent>
                 </Popover>
+                {errors.date && (
+                  <p className="text-sm text-destructive">{errors.date}</p>
+                )}
+                <p className="text-sm text-muted-foreground">
+                  Future dates are not allowed.
+                </p>
               </div>
             </div>
 

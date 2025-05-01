@@ -1,4 +1,4 @@
-import { Save, X, Loader2 } from "lucide-react";
+import { Save, X, Loader2, AlertCircle } from "lucide-react";
 import { Transaction, TransactionType } from "@/types/transaction";
 import { formatDateForInput } from "@/lib/formatters";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useState, useEffect } from "react";
 
 const categories = [
   { value: "food", label: "Food" },
@@ -43,6 +44,30 @@ const TransactionEditForm = ({
   onSave,
   isUpdating,
 }: TransactionEditFormProps) => {
+  // Add a local state for tracking validation errors
+  const [dateError, setDateError] = useState<string>("");
+
+  // Function to check if a date is in the future
+  const isFutureDate = (dateStr: string): boolean => {
+    const inputDate = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize to start of day for comparison
+    return inputDate > today;
+  };
+
+  // Calculate maximum allowed date (today)
+  const maxDate = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
+
+  // Validate date on component mount and when date changes
+  useEffect(() => {
+    const dateValue = formatDateForInput(formData.date);
+    if (isFutureDate(dateValue)) {
+      setDateError("Future dates are not allowed");
+    } else {
+      setDateError("");
+    }
+  }, [formData.date]);
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     field: keyof Transaction
@@ -53,6 +78,17 @@ const TransactionEditForm = ({
       setFormData({
         ...formData,
         [field]: Math.abs(parseFloat(e.target.value) || 0),
+      });
+    } else if (field === "date") {
+      // Check if selected date is in the future
+      if (isFutureDate(e.target.value)) {
+        setDateError("Future dates are not allowed");
+      } else {
+        setDateError("");
+      }
+      setFormData({
+        ...formData,
+        [field]: e.target.value,
       });
     } else {
       setFormData({
@@ -74,6 +110,14 @@ const TransactionEditForm = ({
       ...formData,
       type: value,
     });
+  };
+
+  // Handle save with validation
+  const handleSave = async () => {
+    // Only proceed if there are no validation errors
+    if (!dateError) {
+      await onSave();
+    }
   };
 
   // Display absolute amount for editing
@@ -100,8 +144,8 @@ const TransactionEditForm = ({
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={onSave}
-              disabled={isUpdating}
+              onClick={handleSave}
+              disabled={isUpdating || !!dateError}
             >
               {isUpdating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -128,7 +172,7 @@ const TransactionEditForm = ({
           <Label>Transaction Type</Label>
           <RadioGroup
             value={formData.type}
-            onValueChange={(value: TransactionType) => handleTypeChange(value)} // Correct type here
+            onValueChange={(value: TransactionType) => handleTypeChange(value)}
             className="flex space-x-4"
             disabled={isUpdating}
           >
@@ -166,8 +210,19 @@ const TransactionEditForm = ({
             type="date"
             value={formatDateForInput(formData.date)}
             onChange={(e) => handleInputChange(e, "date")}
+            max={maxDate}
             disabled={isUpdating}
+            className={dateError ? "border-red-500" : ""}
           />
+          {dateError && (
+            <div className="flex items-center gap-1 text-sm text-red-500 mt-1">
+              <AlertCircle className="h-4 w-4" />
+              <span>{dateError}</span>
+            </div>
+          )}
+          <p className="text-sm text-muted-foreground">
+            Future dates are not allowed
+          </p>
         </div>
 
         <div className="space-y-2">
