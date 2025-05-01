@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { useGetTransactionsQuery } from "@/app/lib/Transactions";
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/lib/formatters";
 
 // Transaction type
 interface Transaction {
@@ -42,14 +43,6 @@ interface GraphData {
   income: number;
   expense: number;
 }
-
-// Helper function to format currency
-const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
-};
 
 export default function TransactionGraph() {
   const { data, isLoading, isError } = useGetTransactionsQuery(undefined);

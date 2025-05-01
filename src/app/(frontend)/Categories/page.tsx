@@ -108,13 +108,11 @@ const Categories = () => {
   const isLoading = budgetsLoading || transactionsLoading;
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Budget Management</h1>
-
-      {/* Two column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <>
+      {/* Two column layout with more control */}
+      <div className="flex flex-col lg:flex-row gap-6 mt-10 items-start">
         {/* Left column - Budget management */}
-        <div className="space-y-6">
+        <div className="space-y-6 w-96">
           <BudgetForm onSubmit={handleAddBudget} />
 
           <Card>
@@ -133,7 +131,7 @@ const Categories = () => {
         </div>
 
         {/* Right column - Budget vs Actual comparison */}
-        <div>
+        <div className="flex-1">
           <Card className="h-full">
             <CardHeader>
               <CardTitle>Budget vs Actual Expenses</CardTitle>
@@ -146,12 +144,9 @@ const Categories = () => {
                 <div className="text-center py-8">Loading data...</div>
               ) : comparisonData.length > 0 ? (
                 <div className="space-y-6">
-                  {/* Bar chart comparison */}
                   <div className="h-80">
                     <BudgetComparisonChart data={comparisonData} />
                   </div>
-
-                  {/* Budget usage table */}
                   <div>
                     <h3 className="text-lg font-medium mb-2">
                       Budget Usage Summary
@@ -169,7 +164,7 @@ const Categories = () => {
           </Card>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

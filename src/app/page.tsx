@@ -29,7 +29,7 @@ export default function Home() {
             </button>
 
             <button
-              onClick={() => router.push("/view-expenses")}
+              onClick={() => router.push("/Expenses")}
               className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-indigo-600 border border-indigo-200 text-lg font-medium rounded-lg hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl hover:cursor-pointer"
             >
               <BarChart3 size={24} />

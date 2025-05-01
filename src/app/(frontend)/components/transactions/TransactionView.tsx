@@ -6,7 +6,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Transaction } from "@/types/transaction";
-import { formatDate, formatAmount } from "@/lib/formatters";
+import { formatDate, formatCurrency } from "@/lib/formatters";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -95,7 +95,7 @@ const TransactionView = ({
                   : "text-rose-600 font-medium"
               }
             >
-              {formatAmount(displayAmount)}
+              {formatCurrency(displayAmount)}
             </span>
           </div>
         </div>

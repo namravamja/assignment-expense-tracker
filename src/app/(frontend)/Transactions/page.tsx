@@ -15,7 +15,8 @@ import { Transaction } from "@/types/transaction";
 const TransactionsPage = () => {
   const router = useRouter();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
-  const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
+  const [transactionToDelete, setTransactionToDelete] =
+    useState<Transaction | null>(null);
 
   // RTK Query hook for fetching transactions
   const {
@@ -57,23 +58,30 @@ const TransactionsPage = () => {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <PageHeader />
-      
+
       {Array.isArray(transactions) && transactions.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {transactions.map((transaction: Transaction) => {
             // Determine if it's income or expense based on amount
             // if type is not defined, determine based on amount (for backwards compatibility)
-            const type = transaction.type || (transaction.amount >= 0 ? 'income' : 'expense');
-            
+            const type =
+              transaction.type ||
+              (transaction.amount >= 0 ? "income" : "expense");
+
             return (
               <TransactionCard
-                key={transaction._id || `transaction-${Math.random().toString(36).substr(2, 9)}`}
+                key={
+                  transaction._id ||
+                  `transaction-${Math.random().toString(36).substr(2, 9)}`
+                }
                 transaction={{
                   ...transaction,
-                  type
+                  type,
                 }}
                 onDeleteRequest={handleDeleteRequest}
-                onUpdateSuccess={() => toast.success("Transaction updated successfully")}
+                onUpdateSuccess={() =>
+                  toast.success("Transaction updated successfully")
+                }
                 onUpdateError={(error) => {
                   toast.error("Failed to update transaction");
                   console.error("Update error:", error);
@@ -99,7 +107,7 @@ const TransactionsPage = () => {
 
 const PageHeader = () => {
   const router = useRouter();
-  
+
   return (
     <div className="flex justify-between items-center">
       <div>
@@ -142,7 +150,7 @@ const ErrorState = ({ onRetry }: { onRetry: () => void }) => (
 
 const EmptyState = () => {
   const router = useRouter();
-  
+
   return (
     <Card className="w-full">
       <CardContent className="flex flex-col items-center justify-center py-10">

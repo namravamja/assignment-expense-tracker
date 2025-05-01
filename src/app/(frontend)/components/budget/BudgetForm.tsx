@@ -38,7 +38,6 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onSubmit }) => {
       const success = await onSubmit(selectedCategory, amount);
 
       if (success) {
-        // Reset form
         setSelectedCategory("");
         setAmount("");
       }
@@ -48,58 +47,59 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onSubmit }) => {
   };
 
   return (
-    <Card>
+    <Card className="max-w-96 mx-auto rounded-2xl shadow-md border border-gray-200">
       <CardHeader>
-        <CardTitle>Budget Categories</CardTitle>
+        <CardTitle className="text-2xl">Budget Categories</CardTitle>
         <CardDescription>
-          Set budget limits for different spending categories
+          Set limits for each spending category below
         </CardDescription>
       </CardHeader>
+
       <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="category" className="text-sm font-medium">
-                Category
-              </label>
-              <Select
-                value={selectedCategory}
-                onValueChange={(value) =>
-                  setSelectedCategory(value as Category)
-                }
-              >
-                <SelectTrigger id="category">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="amount" className="text-sm font-medium">
-                Budget Amount
-              </label>
-              <Input
-                id="amount"
-                type="number"
-                placeholder="0.00"
-                min="0"
-                step="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-              />
-            </div>
+        <CardContent className="grid gap-6">
+          <div className="grid gap-2">
+            <label htmlFor="category" className="text-sm font-medium">
+              Category
+            </label>
+            <Select
+              value={selectedCategory}
+              onValueChange={(value) => setSelectedCategory(value as Category)}
+            >
+              <SelectTrigger id="category" className="w-full">
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-2">
+            <label htmlFor="amount" className="text-sm font-medium">
+              Budget Amount
+            </label>
+            <Input
+              id="amount"
+              type="number"
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="w-full"
+            />
           </div>
         </CardContent>
-        <CardFooter>
+
+        <CardFooter className="pt-5">
           <Button
             type="submit"
             disabled={!selectedCategory || !amount || isSubmitting}
+            className="w-full"
           >
             {isSubmitting ? "Adding..." : "Add Budget Category"}
           </Button>
