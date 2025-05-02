@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💸 Expense Tracker
 
-## Getting Started
+A full-stack expense tracking app built using **Next.js 14**, **TypeScript**, **Tailwind CSS**, **Redux Toolkit (RTK)**, and **Mongoose**. It allows users to add, delete, and view expenses with a clean, responsive UI and modern development practices.
 
-First, run the development server:
+🔗 [Live Demo](https://assignment-expense-tracker-nvv.vercel.app/)
+
+---
+
+## ✨ Features
+
+- ✅ Add expense entries with description and amount
+- ✅ View a summarized list of all expenses
+- ✅ Delete individual expenses
+- ✅ Total balance calculation
+- ✅ Responsive design (mobile + desktop)
+- ✅ Global state management using Redux Toolkit
+- ✅ Backend integration with Mongoose (MongoDB)
+- ✅ Modular component-based structure
+- ✅ Input validation for forms
+- ✅ Optimized routing with Next.js App Router
+- ✅ Clean code using TypeScript for full type safety
+- ✅ Deployed on Vercel
+
+---
+
+## 🧾 How to Add a Transaction
+
+1. On the main page, locate the **"Add Expense"** section.
+2. Enter a **description** (e.g., "Groceries", "Bus Ticket").
+3. Enter an **amount**:
+   - Use a **positive number** for income (e.g., `+500`)
+   - Use a **negative number** for expenses (e.g., `-200`)
+4. Click the **Add Transaction** button.
+5. The new transaction will appear instantly in the list and the total balance will update accordingly category and month wise.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- npm or yarn
+- MongoDB database (local or Atlas)
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+git clone https://github.com/namravamja/assignment-expense-tracker.git
+cd assignment-expense-tracker
+npm install  # or yarn install
