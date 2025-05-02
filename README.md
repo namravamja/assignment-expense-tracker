@@ -2,7 +2,7 @@
 
 A full-stack expense tracking app built using **Next.js 14**, **TypeScript**, **Tailwind CSS**, **Redux Toolkit (RTK)**, and **Mongoose**. It allows users to add, delete, and view expenses with a clean, responsive UI and modern development practices.
 
-🔗 <a href="https://assignment-expense-tracker-nvv.vercel.app/" target="_blank">Live Demo</a>
+🔗 [Live Demo](https://assignment-expense-tracker-nvv.vercel.app/)
 
 ---
 
